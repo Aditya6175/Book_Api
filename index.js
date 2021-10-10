@@ -157,9 +157,10 @@ Method                  Put
 */
 ShapeAi.put("/book/update/:isbn", (req, res) =>{
     Database.books.forEach((book) => {
-        if(book.ISBN === req.params.isbn) 
+        if(book.ISBN === req.params.isbn) {
         book.title = req.body.bookTitle;
         return;
+        }
     });
 
     return res.json({books: Database.books});
@@ -173,6 +174,7 @@ Parameters              isbn
 Method                  Put
 */
 ShapeAi.put("/book/author/update/:isbn", (req, res) => {
+    //update the book database
     Database.book.forEach((book) => {
         if(book.ISBN === req.pramas.isbn) return book.author.push(req.body.newAuthor);
     });
@@ -183,5 +185,31 @@ ShapeAi.put("/book/author/update/:isbn", (req, res) => {
     });
 
     return res.json({books : Database.books, authors: Database.authors, message:" New author was added"})
+});
+
+/*
+Route                   /publication/update/book
+Description             Update/add new book to a publication
+Access                  public
+Parameters              isbn
+Method                  Put
+*/
+ShapeAi.put("/publication/update/book/:isbn", (req, res) => {
+    //update the publication database
+    Database.publications.forEach((publication) => {
+        if(publication.id === req.body.pubId) {
+            return publication.books.push(req.params.isbn)
+        };
+    });
+
+    //update the book database
+    Database.books.forEach((book) => {
+        if(book.ISBN === req.params.isbn) {
+            book.publication = req.body.pubId;
+            return;
+        }
+    });
+
+    return res.json({books: Database.books, publications: Database.publications, message: "successfully updated publication",});
 });
 ShapeAi.listen(3000, () => console.log("server is running!!"));
