@@ -1,5 +1,8 @@
+require("dotenv").config();
+
 //Frame Work
 const express = require("express");
+const mongoose = require("mongoose")
 
 //Data Base
 const Database = require("./Database/index")
@@ -9,6 +12,11 @@ const ShapeAi = express();
 
 //configuration express
 ShapeAi.use(express.json());
+
+//establish database connection
+mongoose.connect(process.env.MONGO_URL, {
+
+}).then(() => console.log("connection established!!!!!!!!!!!!!!"));
 
 
 
