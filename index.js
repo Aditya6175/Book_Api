@@ -212,4 +212,78 @@ ShapeAi.put("/publication/update/book/:isbn", (req, res) => {
 
     return res.json({books: Database.books, publications: Database.publications, message: "successfully updated publication",});
 });
+
+/*
+Route                   /book/delete
+Description             delete a book
+Access                  public
+Parameters              isbn
+Method                  DELETE
+*/
+ShapeAi.delete("/book/delete/:isbn", (req, res) => {
+    
+    const updatedBookDatabase = Database.books.filter((book) => book.ISBN !== req.params.isbn );
+    Database.books = updatedBookDatabase;
+    return res.json({books: Database.books });
+
+});
+
+/*
+Route                   /book/delete/author
+Description             delete a author from a book
+Access                  public
+Parameters              isbn, author id
+Method                  DELETE
+*/
+ShapeAi.delete("/book/delete/author/:isbn/:authorId", (req, res) => {
+
+    //update the book database
+    Database.books.forEach((book) =>{
+        if(book.ISBN === req.params.isbn){
+            const newAuthorList = book.authors.filter((author) => author !== parseInt(req.params.authorId));
+            book.authors = newAuthorList;
+            return;
+        }
+    });
+
+    //update the author database
+    Database.authors.forEach((author) => {
+        if(author.id === parseInt(req.params.authorId)){
+            const newBooksList = author.books.filter((book) => book !== req.params.isbn);
+            author.books = newBooksList;
+            return;
+        };
+    });
+    return res.json({book: Database.books, aauthor: Database.authors , message:"author was deleted!!!!!!" });
+
+});
+
+
+/*
+Route                   /publication/delete/book
+Description             Delete a book from publication
+Access                  public
+Parameters              isbn, publication id
+Method                  Delete
+*/
+
+ShapeAi.delete("/publication/delete/book/:isbn/:pubId", (req, res) => {
+    //update publication database
+    Database.publications.forEach((publication) =>{
+        if(publication.id === parseInt(req.params.pubId)){
+            const newBooksList = publication.books.filter((book) => book !== req.params.isbn);
+            publication.books = newBooksList;
+        };
+    });
+
+    //update book database
+    Database.books.forEach((book) => {
+        if(book.ISBN === req.params.isbn){
+            book.publication = 0;
+            return;
+        };
+    });
+    return res.json({books: Database.books, publications: Database.publication})
+});
+
 ShapeAi.listen(3000, () => console.log("server is running!!"));
