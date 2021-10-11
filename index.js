@@ -8,7 +8,7 @@ const mongoose = require("mongoose")
 const Database = require("./Database/index");
 
 //Models
-const BookModels = require("./Database/book");
+const BookModel = require("./Database/book");
 const AuthorModel = require("./Database/author");
 const PublicationModel = require("./Database/publication");
 
@@ -32,8 +32,10 @@ Access                  public
 Parameters              none
 Method                  Get
 */
-ShapeAi.get("/" , (req, res) =>{
-    return res.json({books: Database.books})
+ShapeAi.get("/" ,async  (req, res) =>{
+    const getAllBooks = await BookModel.find();
+    console.log(getAllBooks);
+    return res.json(getAllBooks)
 });
 
 
@@ -44,10 +46,13 @@ Access                  public
 Parameters              isbn
 Method                  Get
 */
-ShapeAi.get("/is/:isbn", (req, res) => {
-    const getSpecificBook = Database.books.filter((book) => book.ISBN === req.params.isbn);
+ShapeAi.get("/is/:isbn", async (req, res) => {
 
-    if(getSpecificBook.length === 0){
+    const getSpecificBook = await BookModel.findOne({ISBN: req.params.isbn})
+
+    // const getSpecificBook = Database.books.filter((book) => book.ISBN === req.params.isbn);
+
+    if(!getSpecificBook){
         return res.json({error: `No book found for the ISBN ${req.params.isbn}`});
     }
 
@@ -61,10 +66,13 @@ Access                  public
 Parameters              category
 Method                  Get
 */
-ShapeAi.get ("/c/:category", (req, res) => {
-    const getSpecificBooks = Database.books.filter((book) => book.category.includes(req.params.category));
+ShapeAi.get ("/c/:category",  async (req, res) => {
 
-    if(getSpecificBooks.length === 0){
+    const getSpecificBooks = await BookModel.findOne({category: req.params.category})
+
+    // const getSpecificBooks = Database.books.filter((book) => book.category.includes(req.params.category));
+
+    if(!getSpecificBooks){
         return res.json({error: `No book found for the category of ${req.params.category}`});
     }
 
@@ -80,8 +88,9 @@ Access                  public
 Parameters              none
 Method                  Get
 */
-ShapeAi.get("/author",  (req, res) => {
-    return res.json({authors: Database.authors})
+ShapeAi.get("/author",  async(req, res) => {
+    const getAllAuthors = await AuthorModel.find()
+    return res.json({authors: getAllAuthors})
 
 });
 
@@ -123,12 +132,14 @@ Access                  public
 Parameters              NONE
 Method                  POST
 */
-ShapeAi.post("book/new", (req, res) =>{
+ShapeAi.post("/book/new", async (req, res) =>{
     const {newBook} = req.body;
 
-    Database.books.push(newBook);
+    const addNewBook = BookModel.create(newBook);
 
-    return res.json({books : Database.books, message: "book was added!"});
+    
+
+    return res.json({books : addNewBook, message: "book was added!"});
 })
 
 /*
@@ -138,12 +149,12 @@ Access                  public
 Parameters              NONE
 Method                  POST
 */
-ShapeAi.post("/author/new", (req, res) => {
+ShapeAi.post("/author/new",(req, res) => {
     const {newAuthor} = req.body;
 
-    Database.authors.push(newAuthor);
+    AuthorModel.create(newAuthor);
 
-    return res.json({authors : Database.authors, message: "authors was added!"});
+    return res.json({message: "authors was added!"});
 })
 
 /*
@@ -168,15 +179,28 @@ Access                  public
 Parameters              isbn
 Method                  Put
 */
-ShapeAi.put("/book/update/:isbn", (req, res) =>{
-    Database.books.forEach((book) => {
-        if(book.ISBN === req.params.isbn) {
-        book.title = req.body.bookTitle;
-        return;
-        }
-    });
+ShapeAi.put("/book/update/:isbn", async (req, res) =>{
 
-    return res.json({books: Database.books});
+    const updatedBook = await BookModel.findOneAndUpdate(
+        {
+            ISBN: req.params.isbn,
+        },
+        {
+            title: req.body.bookTitle,
+        },
+        {
+            new: true,
+        }
+    );
+
+    // Database.books.forEach((book) => {
+    //     if(book.ISBN === req.params.isbn) {
+    //     book.title = req.body.bookTitle;
+    //     return;
+    //     }
+    // });
+
+    return res.json({books: updatedBook});
 });
 
 /*
