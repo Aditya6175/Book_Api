@@ -210,18 +210,48 @@ Access                  public
 Parameters              isbn
 Method                  Put
 */
-ShapeAi.put("/book/author/update/:isbn", (req, res) => {
-    //update the book database
-    Database.book.forEach((book) => {
-        if(book.ISBN === req.pramas.isbn) return book.author.push(req.body.newAuthor);
-    });
+ShapeAi.put("/book/author/update/:isbn", async (req, res) => {
+   //update the book database
+    const updatedBook = await BookModel.findOneAndUpdate(
+        {
+            ISBN: req.params.isbn
+        },
+        {
+            $addToSet: {
+                authors: req.body.newAuthor,
+            },
+        },
+        {
+            new: true,
+        }
+    );
 
-    //update the author database
-    Database.authors.forEach((author) => {
-        if(author.id === req.body.newAuthor) return author.books.push( req.pramas.isbn)
-    });
+    
+    // Database.book.forEach((book) => {
+    //     if(book.ISBN === req.pramas.isbn) return book.author.push(req.body.newAuthor);
+    // });
 
-    return res.json({books : Database.books, authors: Database.authors, message:" New author was added"})
+    // //update the author database
+
+    const updateAuthor = await AuthorModel.findOneAndUpdate(
+        {
+           id: req.body.newAuthor, 
+        },
+        {
+            $push:{
+                books: req.params.isbn,
+            },
+        },
+        {
+            new: true,
+        }
+    );
+
+    // Database.authors.forEach((author) => {
+    //     if(author.id === req.body.newAuthor) return author.books.push( req.pramas.isbn)
+    // });
+
+    return res.json({books : updatedBook, authors: updateAuthor, message:" New author was added"})
 });
 
 /*
