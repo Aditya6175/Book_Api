@@ -5,7 +5,12 @@ const express = require("express");
 const mongoose = require("mongoose")
 
 //Data Base
-const Database = require("./Database/index")
+const Database = require("./Database/index");
+
+//Models
+const BookModels = require("./Database/book");
+const AuthorModel = require("./Database/author");
+const PublicationModel = require("./Database/publication");
 
 //Initialization  Express
 const ShapeAi = express();
